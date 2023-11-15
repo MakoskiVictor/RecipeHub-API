@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
 import { DietService } from './diet.service';
 import { CreateDietDTO } from './dto/create-diet.dto';
 
@@ -14,5 +14,10 @@ export class DietController {
   @Post()
   postDiet(@Body() newDiet: CreateDietDTO) {
     return this.dietService.postDiet(newDiet);
+  }
+
+  @Delete()
+  deleteDiets() {
+    return this.dietService.deleteDiets();
   }
 }

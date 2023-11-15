@@ -16,7 +16,41 @@ export class DietService {
     const newDiet = this.dietRepository.create(diet);
     return this.dietRepository.save(newDiet);
   }
+
+  deleteDiets() {
+    return this.dietRepository.clear();
+  }
+
   async getDiets() {
-    return this.dietRepository.find();
+    const allDiets = await this.dietRepository.find();
+    console.log(allDiets);
+    if (allDiets.length === 0) {
+      const types = [
+        'gluten free',
+        'dairy free',
+        'ketogenic',
+        'vegetarian',
+        'lacto vegetarian',
+        'lacto ovo vegetarian',
+        'ovo vegetarian',
+        'vegan',
+        'pescatarian',
+        'paleolithic',
+        'primal',
+        'fodmap friendly',
+        'whole 30',
+      ];
+
+      types.map(async (d) => {
+        const diets = new Diet();
+        diets.name = d;
+
+        await this.dietRepository.save(diets);
+      });
+      const allDiets = await this.dietRepository.manager.find(Diet);
+      return allDiets;
+    } else {
+      return allDiets;
+    }
   }
 }
