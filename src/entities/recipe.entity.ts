@@ -1,6 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { IsNotEmpty, IsUrl, Max, Min } from 'class-validator';
+import { Diet } from './diet.entity';
 
 @Entity({ name: 'recipes' })
 export class Recipe {
@@ -30,4 +37,8 @@ export class Recipe {
   @IsNotEmpty()
   @IsUrl()
   image: string;
+
+  @ManyToMany(() => Diet)
+  @JoinTable()
+  diets: Diet[];
 }
