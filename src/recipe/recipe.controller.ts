@@ -1,5 +1,6 @@
-import { Controller, Delete, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
 import { RecipeService } from './recipe.service';
+import { CreateRecipeDTO } from './dto/create-recipe-dto';
 
 @Controller('recipe')
 export class RecipeController {
@@ -18,8 +19,8 @@ export class RecipeController {
   }
 
   @Post()
-  postRecipe() {
-    return this.recipeService.postRecipe();
+  postRecipe(@Body() newRecipe: CreateRecipeDTO) {
+    return this.recipeService.postRecipe(newRecipe);
   }
 
   @Delete()
