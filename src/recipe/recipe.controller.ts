@@ -24,7 +24,7 @@ export class RecipeController {
   }
 
   @Delete()
-  deleteRecipe() {
+  deleteAllRecipes() {
     return this.recipeService.deleteRecipe();
   }
 }
