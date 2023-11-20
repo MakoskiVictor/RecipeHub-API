@@ -15,8 +15,17 @@ export class RecipeService {
 
   // Métodos a inyectar en el controller
 
-  getAllRecipes() {
-    return 'These are all the recipes!';
+  async getAllRecipes() {
+    const getRecipes = await this.recipeRepository.find();
+
+    if (!getRecipes) {
+      /* return new HttpException('Recipes not found', HttpStatus.NOT_FOUND); */
+      fetch(
+        `https://api.spoonacular.com/recipes/random?apiKey=${process.env.API_KEY}`,
+      ).then((res) => console.log(res));
+    }
+
+    return getRecipes;
   }
 
   getRecipeById() {}
@@ -63,5 +72,11 @@ export class RecipeService {
     return this.recipeRepository.save(newRecipe);
   }
 
-  deleteRecipe() {}
+  async deleteRecipe() {
+    const searchRecipe = await this.recipeRepository.find();
+    if (!searchRecipe) {
+      return new HttpException('There are no recipes', HttpStatus.NOT_FOUND);
+    }
+    return this.recipeRepository.clear();
+  }
 }
