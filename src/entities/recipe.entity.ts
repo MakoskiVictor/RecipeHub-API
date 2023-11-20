@@ -38,7 +38,7 @@ export class Recipe {
   @IsUrl()
   image: string;
 
-  @ManyToMany(() => Diet)
+  @ManyToMany(() => Diet, { onDelete: 'CASCADE' })
   @JoinTable()
   diets: Diet[];
 }
