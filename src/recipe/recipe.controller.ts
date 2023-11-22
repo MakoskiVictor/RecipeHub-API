@@ -13,9 +13,9 @@ export class RecipeController {
     return this.recipeService.getAllRecipes();
   }
 
-  @Get()
-  getRecipeById() {
-    return this.recipeService.getRecipeById();
+  @Get(':id')
+  getRecipeById(@Param('id') id: string) {
+    return this.recipeService.getRecipeById(id);
   }
 
   @Post()
