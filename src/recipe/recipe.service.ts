@@ -4,6 +4,8 @@ import { Recipe } from 'src/entities/recipe.entity';
 import { Repository } from 'typeorm';
 import { CreateRecipeDTO } from './dto/create-recipe-dto';
 import { Diet } from 'src/entities/diet.entity';
+import { RecipeApi } from './types/recipe-api-types';
+import { extractSteps } from './utils';
 
 @Injectable()
 export class RecipeService {
@@ -18,11 +20,24 @@ export class RecipeService {
   async getAllRecipes() {
     const getRecipes = await this.recipeRepository.find();
 
-    if (!getRecipes) {
+    if (getRecipes.length === 0) {
       /* return new HttpException('Recipes not found', HttpStatus.NOT_FOUND); */
-      fetch(
-        `https://api.spoonacular.com/recipes/random?apiKey=${process.env.API_KEY}`,
-      ).then((res) => console.log(res));
+      const searchFromApi: RecipeApi = await fetch(
+        `https://api.spoonacular.com/recipes/random?apiKey=${process.env.API_KEY}&addRecipeInformation=true&number=10`,
+      ).then((res) => res.json());
+
+      const mapSearchedRecipesFromApi = searchFromApi.recipes.map((r) => {
+        return {
+          name: r.title,
+          summary: r.summary,
+          healthScore: r.healthScore,
+          steps: extractSteps(r.analyzedInstructions),
+          image: r.sourceUrl,
+          diets: r.diets,
+        };
+      });
+
+      return mapSearchedRecipesFromApi;
     }
 
     return getRecipes;
