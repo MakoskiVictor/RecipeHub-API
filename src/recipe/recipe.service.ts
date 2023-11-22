@@ -4,8 +4,7 @@ import { Recipe } from 'src/entities/recipe.entity';
 import { Repository } from 'typeorm';
 import { CreateRecipeDTO } from './dto/create-recipe-dto';
 import { Diet } from 'src/entities/diet.entity';
-import { RecipeApi } from './types/recipe-api-types';
-import { extractSteps } from './utils';
+import { postFromApi } from './utils';
 
 @Injectable()
 export class RecipeService {
@@ -21,51 +20,24 @@ export class RecipeService {
     const getRecipes = await this.recipeRepository.find();
 
     if (getRecipes.length === 0) {
-      const searchFromApi: RecipeApi = await fetch(
-        `https://api.spoonacular.com/recipes/random?apiKey=${process.env.API_KEY}&addRecipeInformation=true&number=2`,
-      ).then((res) => res.json());
-
-      const mapSearchedRecipesFromApi: CreateRecipeDTO[] =
-        searchFromApi.recipes.map((r) => {
-          return {
-            name: r.title,
-            summary: r.summary,
-            healthScore: r.healthScore,
-            steps: extractSteps(r.analyzedInstructions),
-            image: r.sourceUrl,
-            diets: r.diets,
-          };
-        });
-
-      for (let i = 0; i < mapSearchedRecipesFromApi.length; i++) {
-        const selectedDiets = await Promise.all(
-          mapSearchedRecipesFromApi[i].diets.map(
-            async (diet) =>
-              await this.dietRepository.findOne({ where: { name: diet } }),
-          ),
-        );
-
-        const newRecipe = new Recipe();
-        newRecipe.name = mapSearchedRecipesFromApi[i].name;
-        newRecipe.steps = mapSearchedRecipesFromApi[i].steps;
-        newRecipe.healthScore = mapSearchedRecipesFromApi[i].healthScore;
-        newRecipe.summary = mapSearchedRecipesFromApi[i].summary;
-        newRecipe.image =
-          mapSearchedRecipesFromApi[i].image ||
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTABE23O3ZT5uGShVBbMEMpQM3u2M3f4WldUA&usqp=CAU';
-        newRecipe.diets = selectedDiets;
-
-        await this.recipeRepository.save(newRecipe);
-      }
-
-      return mapSearchedRecipesFromApi;
+      const recipeRepository: Repository<Recipe> = this.recipeRepository;
+      const dietRepository: Repository<Diet> = this.dietRepository;
+      await postFromApi(dietRepository, recipeRepository);
+      const getNewRecipes = await this.recipeRepository.find();
+      return getNewRecipes;
     }
-
-    const getNewRecipes = await this.recipeRepository.find();
-    return getNewRecipes;
+    return getRecipes;
   }
 
-  getRecipeById() {}
+  getRecipeById(id: string) {
+    const findRecipe = this.recipeRepository.findOneById(id);
+
+    if (findRecipe === null || findRecipe === undefined) {
+      return new HttpException('Recipe not found', HttpStatus.NOT_FOUND);
+    }
+
+    return findRecipe;
+  }
 
   // POSTEO DE RECIPE
   async postRecipe(recipe: CreateRecipeDTO) {
