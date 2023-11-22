@@ -72,11 +72,11 @@ export class RecipeService {
     return this.recipeRepository.save(newRecipe);
   }
 
-  async deleteRecipe() {
-    const searchRecipe = await this.recipeRepository.find();
+  async deleteRecipe(id: string) {
+    const searchRecipe = await this.recipeRepository.findOneById(id);
     if (!searchRecipe) {
       return new HttpException('There are no recipes', HttpStatus.NOT_FOUND);
     }
-    return this.recipeRepository.clear();
+    return this.recipeRepository.remove(searchRecipe);
   }
 }
