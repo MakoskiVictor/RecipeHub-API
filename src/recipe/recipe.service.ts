@@ -21,26 +21,48 @@ export class RecipeService {
     const getRecipes = await this.recipeRepository.find();
 
     if (getRecipes.length === 0) {
-      /* return new HttpException('Recipes not found', HttpStatus.NOT_FOUND); */
       const searchFromApi: RecipeApi = await fetch(
-        `https://api.spoonacular.com/recipes/random?apiKey=${process.env.API_KEY}&addRecipeInformation=true&number=10`,
+        `https://api.spoonacular.com/recipes/random?apiKey=${process.env.API_KEY}&addRecipeInformation=true&number=2`,
       ).then((res) => res.json());
 
-      const mapSearchedRecipesFromApi = searchFromApi.recipes.map((r) => {
-        return {
-          name: r.title,
-          summary: r.summary,
-          healthScore: r.healthScore,
-          steps: extractSteps(r.analyzedInstructions),
-          image: r.sourceUrl,
-          diets: r.diets,
-        };
-      });
+      const mapSearchedRecipesFromApi: CreateRecipeDTO[] =
+        searchFromApi.recipes.map((r) => {
+          return {
+            name: r.title,
+            summary: r.summary,
+            healthScore: r.healthScore,
+            steps: extractSteps(r.analyzedInstructions),
+            image: r.sourceUrl,
+            diets: r.diets,
+          };
+        });
+
+      for (let i = 0; i < mapSearchedRecipesFromApi.length; i++) {
+        const selectedDiets = await Promise.all(
+          mapSearchedRecipesFromApi[i].diets.map(
+            async (diet) =>
+              await this.dietRepository.findOne({ where: { name: diet } }),
+          ),
+        );
+
+        const newRecipe = new Recipe();
+        newRecipe.name = mapSearchedRecipesFromApi[i].name;
+        newRecipe.steps = mapSearchedRecipesFromApi[i].steps;
+        newRecipe.healthScore = mapSearchedRecipesFromApi[i].healthScore;
+        newRecipe.summary = mapSearchedRecipesFromApi[i].summary;
+        newRecipe.image =
+          mapSearchedRecipesFromApi[i].image ||
+          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTABE23O3ZT5uGShVBbMEMpQM3u2M3f4WldUA&usqp=CAU';
+        newRecipe.diets = selectedDiets;
+
+        await this.recipeRepository.save(newRecipe);
+      }
 
       return mapSearchedRecipesFromApi;
     }
 
-    return getRecipes;
+    const getNewRecipes = await this.recipeRepository.find();
+    return getNewRecipes;
   }
 
   getRecipeById() {}
