@@ -23,7 +23,7 @@ export class DietService {
 
   async getDiets() {
     const allDiets = await this.dietRepository.find();
-    console.log(allDiets);
+
     if (allDiets.length === 0) {
       const types = [
         'gluten free',
