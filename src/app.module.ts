@@ -22,7 +22,7 @@ import { ConfigModule } from '@nestjs/config';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       entities: [Diet, Recipe],
-      synchronize: false,
+      synchronize: true,
     }),
     RecipeModule,
     DietModule,
