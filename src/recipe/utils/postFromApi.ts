@@ -24,7 +24,7 @@ export const postFromApi = async (
         summary: r.summary,
         healthScore: r.healthScore,
         steps: extractSteps(r.analyzedInstructions),
-        image: r.sourceUrl,
+        image: r.image,
         diets: r.diets,
       };
     });
