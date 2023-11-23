@@ -12,7 +12,7 @@ export const postFromApi = async (
   // Llamada a api
 
   const searchFromApi: RecipeApi = await fetch(
-    `https://api.spoonacular.com/recipes/random?apiKey=${process.env.API_KEY}&addRecipeInformation=true&number=2`,
+    `https://api.spoonacular.com/recipes/random?apiKey=${process.env.API_KEY}&addRecipeInformation=true&number=100`,
   ).then((res) => res.json());
 
   // Mapeo de respuesta
